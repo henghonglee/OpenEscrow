@@ -69,6 +69,16 @@ contract LightningLockEscrow {
         emit AssetsReleased();
     }
 
+    // anyone can abort if the transaction is expired
+    function abort() public onlyExpired returns (bool) {
+        if (token.balanceOf(address(this)) == tokenAmount) {
+            token.safeTransfer(depositor, tokenAmount);
+        }
+        emit Aborted();
+        state = State.Aborted;
+        return true;
+    }
+
     modifier onlyDepositor() {
         require(msg.sender == depositor, "Only buyer can call this.");
         _;
