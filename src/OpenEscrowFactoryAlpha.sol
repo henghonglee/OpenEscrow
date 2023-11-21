@@ -7,7 +7,14 @@ import "lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
 contract OpenEscrowFactoryAlpha {
     OpenEscrow[] public contracts;
 
-    event EscrowCreated(address indexed buyer, address indexed seller, ERC20 buyerToken, uint256 buyerTokenAmount, ERC20 sellerToken, uint256 sellerTokenAmount);
+    event EscrowCreated(
+        address indexed buyer,
+        address indexed seller,
+        ERC20 buyerToken,
+        uint256 buyerTokenAmount,
+        ERC20 sellerToken,
+        uint256 sellerTokenAmount
+    );
 
     function createEscrow(
         address payable buyer,
@@ -17,9 +24,23 @@ contract OpenEscrowFactoryAlpha {
         ERC20 sellerToken,
         uint256 sellerTokenAmount
     ) public {
-        OpenEscrow escrow = new OpenEscrow(buyer, seller, buyerToken, buyerTokenAmount, sellerToken, sellerTokenAmount);
+        OpenEscrow escrow = new OpenEscrow(
+            buyer,
+            seller,
+            buyerToken,
+            buyerTokenAmount,
+            sellerToken,
+            sellerTokenAmount
+        );
         contracts.push(escrow);
-        emit EscrowCreated(buyer, seller, buyerToken, buyerTokenAmount, sellerToken, sellerTokenAmount);
+        emit EscrowCreated(
+            buyer,
+            seller,
+            buyerToken,
+            buyerTokenAmount,
+            sellerToken,
+            sellerTokenAmount
+        );
     }
 
     function getDeployedEscrows() public view returns (OpenEscrow[] memory) {
