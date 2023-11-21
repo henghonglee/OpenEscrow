@@ -8,166 +8,166 @@ import "src/X.sol";
 import "src/Y.sol";
 
 contract TestContract is Test {
-    OpenEscrow c;
-    IERC20 x_token;
-    IERC20 y_token;
+    OpenEscrow _c;
+    IERC20 _xToken;
+    IERC20 _yToken;
 
-    address owner;
-    address payable buyer;
-    address payable seller;
-    address payable kickback;
+    address _owner;
+    address payable _buyer;
+    address payable _seller;
+    address payable _kickback;
 
     function setUp() public {
-        owner = vm.addr(0x444);
-        kickback = payable(vm.addr(0x888));
-        buyer = payable(vm.addr(0x123));
-        seller = payable(vm.addr(0x234));
-        vm.prank(buyer);
-        x_token = new X(9999999999); // buyer starts with 100 X
-        vm.prank(seller);
-        y_token = new Y(9999999999); // seller starts with 100 Y
-        vm.prank(owner);
+        _owner = vm.addr(0x444);
+        _kickback = payable(vm.addr(0x888));
+        _buyer = payable(vm.addr(0x123));
+        _seller = payable(vm.addr(0x234));
+        vm.prank(_buyer);
+        _xToken = new X(9999999999); // _buyer starts with 100 X
+        vm.prank(_seller);
+        _yToken = new Y(9999999999); // _seller starts with 100 Y
+        vm.prank(_owner);
     }
 
     function testSwap() public {
-        c = new OpenEscrow(buyer, seller, x_token, 500000, y_token, 500000);
-        vm.prank(buyer);
-        x_token.approve(address(c), 500000);
-        vm.prank(buyer);
-        c.buyerDeposit();
-        assertEq(x_token.balanceOf(address(c)), 500000);
-        vm.prank(seller);
-        y_token.approve(address(c), 500000);
-        vm.prank(seller);
-        c.sellerDeposit();
-        assertEq(y_token.balanceOf(address(c)), 500000);
-        vm.prank(owner);
-        c.releaseAssets(kickback);
+        _c = new OpenEscrow(_buyer, _seller, _xToken, 500000, _yToken, 500000);
+        vm.prank(_buyer);
+        _xToken.approve(address(_c), 500000);
+        vm.prank(_buyer);
+        _c.buyerDeposit();
+        assertEq(_xToken.balanceOf(address(_c)), 500000);
+        vm.prank(_seller);
+        _yToken.approve(address(_c), 500000);
+        vm.prank(_seller);
+        _c.sellerDeposit();
+        assertEq(_yToken.balanceOf(address(_c)), 500000);
+        vm.prank(_owner);
+        _c.releaseAssets(_kickback);
 
-        assertEq(x_token.balanceOf(seller), 499925);
-        assertEq(x_token.balanceOf(address(c)), 0);
-        assertEq(y_token.balanceOf(address(c)), 0);
-        assertEq(y_token.balanceOf(buyer), 499925);
-        assertEq(x_token.balanceOf(kickback), 75);
-        assertEq(x_token.balanceOf(kickback), 75);
+        assertEq(_xToken.balanceOf(_seller), 499925);
+        assertEq(_xToken.balanceOf(address(_c)), 0);
+        assertEq(_yToken.balanceOf(address(_c)), 0);
+        assertEq(_yToken.balanceOf(_buyer), 499925);
+        assertEq(_xToken.balanceOf(_kickback), 75);
+        assertEq(_xToken.balanceOf(_kickback), 75);
     }
 
-    function testSwap_Small() public {
-        c = new OpenEscrow(buyer, seller, x_token, 100, y_token, 100);
-        vm.prank(buyer);
-        x_token.approve(address(c), 100);
-        vm.prank(buyer);
-        c.buyerDeposit();
-        assertEq(x_token.balanceOf(address(c)), 100);
-        vm.prank(seller);
-        y_token.approve(address(c), 100);
-        vm.prank(seller);
-        c.sellerDeposit();
-        assertEq(y_token.balanceOf(address(c)), 100);
-        vm.prank(owner);
-        c.releaseAssets(kickback);
+    function testSwapSmall() public {
+        _c = new OpenEscrow(_buyer, _seller, _xToken, 100, _yToken, 100);
+        vm.prank(_buyer);
+        _xToken.approve(address(_c), 100);
+        vm.prank(_buyer);
+        _c.buyerDeposit();
+        assertEq(_xToken.balanceOf(address(_c)), 100);
+        vm.prank(_seller);
+        _yToken.approve(address(_c), 100);
+        vm.prank(_seller);
+        _c.sellerDeposit();
+        assertEq(_yToken.balanceOf(address(_c)), 100);
+        vm.prank(_owner);
+        _c.releaseAssets(_kickback);
 
-        assertEq(x_token.balanceOf(seller), 100);
-        assertEq(y_token.balanceOf(buyer), 100);
-        assertEq(x_token.balanceOf(kickback), 0);
-        assertEq(x_token.balanceOf(kickback), 0); // fee is smaller than the smallest division of the token
-        assertEq(x_token.balanceOf(address(c)), 0);
-        assertEq(y_token.balanceOf(address(c)), 0);
+        assertEq(_xToken.balanceOf(_seller), 100);
+        assertEq(_yToken.balanceOf(_buyer), 100);
+        assertEq(_xToken.balanceOf(_kickback), 0);
+        assertEq(_xToken.balanceOf(_kickback), 0); // fee is smaller than the smallest division of the token
+        assertEq(_xToken.balanceOf(address(_c)), 0);
+        assertEq(_yToken.balanceOf(address(_c)), 0);
     }
 
-    function testFailSwap_BuyerDeposit() public {
-        c = new OpenEscrow(buyer, seller, x_token, 500000, y_token, 500000);
-        vm.prank(buyer);
-        x_token.approve(address(c), 500000);
-        vm.prank(buyer);
-        c.buyerDeposit();
-        assertEq(x_token.balanceOf(address(c)), 500000);
-        vm.prank(buyer);
-        c.releaseAssets(kickback);
-        assertEq(x_token.balanceOf(address(c)), 0);
-        assertEq(y_token.balanceOf(address(c)), 0);
+    function testFailSwapBuyerDeposit() public {
+        _c = new OpenEscrow(_buyer, _seller, _xToken, 500000, _yToken, 500000);
+        vm.prank(_buyer);
+        _xToken.approve(address(_c), 500000);
+        vm.prank(_buyer);
+        _c.buyerDeposit();
+        assertEq(_xToken.balanceOf(address(_c)), 500000);
+        vm.prank(_buyer);
+        _c.releaseAssets(_kickback);
+        assertEq(_xToken.balanceOf(address(_c)), 0);
+        assertEq(_yToken.balanceOf(address(_c)), 0);
     }
 
-    function testFailSwap_SellerDeposit() public {
-        c = new OpenEscrow(buyer, seller, x_token, 500000, y_token, 500000);
-        vm.prank(seller);
-        y_token.approve(address(c), 500000);
-        vm.prank(seller);
-        c.sellerDeposit();
-        assertEq(y_token.balanceOf(address(c)), 500000);
-        vm.prank(seller);
-        c.releaseAssets(kickback);
-        assertEq(x_token.balanceOf(address(c)), 0);
-        assertEq(y_token.balanceOf(address(c)), 0);
+    function testFailSwapSellerDeposit() public {
+        _c = new OpenEscrow(_buyer, _seller, _xToken, 500000, _yToken, 500000);
+        vm.prank(_seller);
+        _yToken.approve(address(_c), 500000);
+        vm.prank(_seller);
+        _c.sellerDeposit();
+        assertEq(_yToken.balanceOf(address(_c)), 500000);
+        vm.prank(_seller);
+        _c.releaseAssets(_kickback);
+        assertEq(_xToken.balanceOf(address(_c)), 0);
+        assertEq(_yToken.balanceOf(address(_c)), 0);
     }
 
-    function testAbort_BothDepositors() public {
-        c = new OpenEscrow(buyer, seller, x_token, 500000, y_token, 500000);
-        vm.prank(buyer);
-        x_token.approve(address(c), 500000);
-        vm.prank(buyer);
-        c.buyerDeposit();
-        assertEq(x_token.balanceOf(address(c)), 500000);
-        vm.prank(seller);
-        y_token.approve(address(c), 500000);
-        vm.prank(seller);
-        c.sellerDeposit();
-        assertEq(y_token.balanceOf(address(c)), 500000);
+    function testAbortBothDepositors() public {
+        _c = new OpenEscrow(_buyer, _seller, _xToken, 500000, _yToken, 500000);
+        vm.prank(_buyer);
+        _xToken.approve(address(_c), 500000);
+        vm.prank(_buyer);
+        _c.buyerDeposit();
+        assertEq(_xToken.balanceOf(address(_c)), 500000);
+        vm.prank(_seller);
+        _yToken.approve(address(_c), 500000);
+        vm.prank(_seller);
+        _c.sellerDeposit();
+        assertEq(_yToken.balanceOf(address(_c)), 500000);
         vm.roll(block.number + 100834);
-        vm.prank(seller);
-        c.abort();
+        vm.prank(_seller);
+        _c.abort();
 
-        assertEq(x_token.balanceOf(address(c)), 0);
-        assertEq(y_token.balanceOf(address(c)), 0);
+        assertEq(_xToken.balanceOf(address(_c)), 0);
+        assertEq(_yToken.balanceOf(address(_c)), 0);
     }
 
-    function testAbort_BuyerDepositor() public {
-        c = new OpenEscrow(buyer, seller, x_token, 500000, y_token, 500000);
-        vm.prank(buyer);
-        x_token.approve(address(c), 500000);
-        vm.prank(buyer);
-        c.buyerDeposit();
-        assertEq(x_token.balanceOf(address(c)), 500000);
+    function testAbortBuyerDepositor() public {
+        _c = new OpenEscrow(_buyer, _seller, _xToken, 500000, _yToken, 500000);
+        vm.prank(_buyer);
+        _xToken.approve(address(_c), 500000);
+        vm.prank(_buyer);
+        _c.buyerDeposit();
+        assertEq(_xToken.balanceOf(address(_c)), 500000);
 
         vm.roll(block.number + 100834);
-        vm.prank(seller);
-        c.abort();
+        vm.prank(_seller);
+        _c.abort();
 
-        assertEq(x_token.balanceOf(address(c)), 0);
-        assertEq(y_token.balanceOf(address(c)), 0);
+        assertEq(_xToken.balanceOf(address(_c)), 0);
+        assertEq(_yToken.balanceOf(address(_c)), 0);
     }
 
-    function testAbort_SellerDepositor() public {
-        c = new OpenEscrow(buyer, seller, x_token, 500000, y_token, 500000);
-        vm.prank(seller);
-        y_token.approve(address(c), 500000);
-        vm.prank(seller);
-        c.sellerDeposit();
-        assertEq(y_token.balanceOf(address(c)), 500000);
+    function testAbortSellerDepositor() public {
+        _c = new OpenEscrow(_buyer, _seller, _xToken, 500000, _yToken, 500000);
+        vm.prank(_seller);
+        _yToken.approve(address(_c), 500000);
+        vm.prank(_seller);
+        _c.sellerDeposit();
+        assertEq(_yToken.balanceOf(address(_c)), 500000);
         vm.roll(block.number + 100834);
-        vm.prank(seller);
-        c.abort();
+        vm.prank(_seller);
+        _c.abort();
 
-        assertEq(x_token.balanceOf(address(c)), 0);
-        assertEq(y_token.balanceOf(address(c)), 0);
+        assertEq(_xToken.balanceOf(address(_c)), 0);
+        assertEq(_yToken.balanceOf(address(_c)), 0);
     }
 
     function testFailAbort() public {
-        c = new OpenEscrow(buyer, seller, x_token, 500000, y_token, 500000);
-        vm.prank(buyer);
-        x_token.approve(address(c), 500000);
-        vm.prank(buyer);
-        c.buyerDeposit();
-        assertEq(x_token.balanceOf(address(c)), 500000);
-        vm.prank(seller);
-        y_token.approve(address(c), 500000);
-        vm.prank(seller);
-        c.sellerDeposit();
-        assertEq(y_token.balanceOf(address(c)), 500000);
+        _c = new OpenEscrow(_buyer, _seller, _xToken, 500000, _yToken, 500000);
+        vm.prank(_buyer);
+        _xToken.approve(address(_c), 500000);
+        vm.prank(_buyer);
+        _c.buyerDeposit();
+        assertEq(_xToken.balanceOf(address(_c)), 500000);
+        vm.prank(_seller);
+        _yToken.approve(address(_c), 500000);
+        vm.prank(_seller);
+        _c.sellerDeposit();
+        assertEq(_yToken.balanceOf(address(_c)), 500000);
         vm.roll(block.number + 100833); //100833 fails here
-        vm.prank(seller);
-        c.abort();
-        assertEq(x_token.balanceOf(address(c)), 0);
-        assertEq(y_token.balanceOf(address(c)), 0);
+        vm.prank(_seller);
+        _c.abort();
+        assertEq(_xToken.balanceOf(address(_c)), 0);
+        assertEq(_yToken.balanceOf(address(_c)), 0);
     }
 }
