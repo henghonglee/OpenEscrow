@@ -4,7 +4,7 @@ pragma solidity >=0.7.0 <0.9.0;
 import "./OpenEscrow.sol";
 import "lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
 
-contract OpenEscrowFactoryAlpha {
+contract OpenEscrowFactoryV0 {
     OpenEscrow[] public contracts;
 
     event EscrowCreated(

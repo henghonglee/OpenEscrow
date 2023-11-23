@@ -58,12 +58,9 @@ contract LightningLockEscrow {
 
     // Function to release funds using the Lightning preimage
     function releaseWithPreimage(
-        bytes32 preimage
+        bytes memory preimage
     ) public inState(State.Deposited) {
-        require(
-            keccak256(abi.encodePacked(preimage)) == paymentHash,
-            "Invalid preimage"
-        );
+        require(sha256(preimage) == paymentHash, "Invalid preimage");
         token.safeTransfer(destAddress, tokenAmount);
         state = State.AssetsReleased;
         emit AssetsReleased();

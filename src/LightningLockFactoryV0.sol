@@ -4,7 +4,7 @@ pragma solidity >=0.7.0 <0.9.0;
 import "./LightningLockEscrow.sol";
 import "lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
 
-contract LightningLockFactoryAlpha {
+contract LightningLockFactoryV0 {
     LightningLockEscrow[] public contracts;
 
     event EscrowCreated(
@@ -29,15 +29,14 @@ contract LightningLockFactoryAlpha {
             tokenAmount
         );
         contracts.push(escrow);
-        emit EscrowCreated(
-            depositor,
-            destAddress,
-            token,
-            tokenAmount
-        );
+        emit EscrowCreated(depositor, destAddress, token, tokenAmount);
     }
 
-    function getDeployedEscrows() public view returns (LightningLockEscrow[] memory) {
+    function getDeployedEscrows()
+        public
+        view
+        returns (LightningLockEscrow[] memory)
+    {
         return contracts;
     }
 }
