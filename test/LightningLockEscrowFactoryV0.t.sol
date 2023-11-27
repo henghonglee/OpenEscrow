@@ -4,11 +4,12 @@ pragma solidity ^0.8.13;
 import "forge-std/Test.sol";
 import "forge-std/console.sol";
 
-import "src/LightningLockEscrowV0.sol";
+import "src/LightningLockFactoryV0.sol";
 import "src/X.sol";
 
 contract TestContract is Test {
     LightningLockEscrow _c;
+    LightningLockFactoryV0 _f;
     IERC20 _xToken;
     address _owner;
     address payable _depositor;
@@ -94,9 +95,11 @@ contract TestContract is Test {
         vm.prank(_owner);
     }
 
-    function testSwap() public {
+    function testCreateEscrow() public {
         console.logBytes32(_paymentHash);
-        _c = new LightningLockEscrow(
+
+        _f = new LightningLockFactoryV0();
+        _c = _f.createEscrow(
             _depositor,
             _destAddress,
             _paymentHash,
@@ -113,26 +116,5 @@ contract TestContract is Test {
         assertEq(_xToken.balanceOf(_destAddress), 500000);
         assertEq(_xToken.balanceOf(address(_c)), 0);
         assertEq(_xToken.balanceOf(address(_depositor)), 0);
-    }
-
-    function testAbort() public {
-        _c = new LightningLockEscrow(
-            _depositor,
-            _destAddress,
-            _paymentHash,
-            _xToken,
-            500000
-        );
-        vm.prank(_depositor);
-        _xToken.approve(address(_c), 500000);
-        vm.prank(_depositor);
-        _c.deposit();
-        assertEq(_xToken.balanceOf(address(_c)), 500000);
-        vm.roll(block.number + 100834);
-        vm.prank(_depositor);
-        _c.abort();
-
-        assertEq(_xToken.balanceOf(address(_c)), 0);
-        assertEq(_xToken.balanceOf(_depositor), 500000);
     }
 }
